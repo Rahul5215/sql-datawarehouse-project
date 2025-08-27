@@ -1,0 +1,18 @@
+
+/* =========================================================
+   3. Explore Dating Ranges
+========================================================= */
+-- Explore first and last order date & number of years of sales
+SELECT
+    MIN(order_date) AS first_order_date,
+    MAX(order_date) AS last_order_date,
+    DATE_PART('year', AGE(MAX(order_date), MIN(order_date))) AS order_range_year
+FROM gold.fact_sales;
+
+-- Find youngest and oldest customer
+SELECT 
+    MIN(birthdate) AS oldest_birthdate,
+    MAX(birthdate) AS youngest_birthdate,
+    DATE_PART('year', AGE(CURRENT_DATE, MIN(birthdate))) AS oldest_age,
+    DATE_PART('year', AGE(CURRENT_DATE, MAX(birthdate))) AS youngest_age
+FROM gold.dim_customers;
