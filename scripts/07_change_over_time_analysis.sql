@@ -2,25 +2,45 @@
    7. Change Over Time Analysis
 ========================================================= */
 
--- Find the first and last order date and how many years of sales are available
+--A high-level overview insight that helps with strategic decision making.
 SELECT
-MIN(order_date) AS first_order_date,
-MAX(order_date) AS last_order_date,
-DATE_PART('year', AGE(MAX(order_date), MIN(order_date))) AS order_range_year
-FROM gold.fact_sales;
+EXTRACT(YEAR FROM order_date) AS order_year,
+SUM(sales_amount) AS total_sales,
+COUNT(DISTINCT customer_key) AS total_customers,
+SUM(quantity) AS total_quantity
+FROM gold.fact_sales
+WHERE order_date IS NOT NULL
+GROUP BY order_year
+ORDER BY order_year
+
+--A high-level overview insight that helps with strategic decision making.
+SELECT
+EXTRACT(YEAR FROM order_date) AS order_year,
+EXTRACT(MONTH FROM order_date) AS order_month,
+SUM(sales_amount) AS total_sales,
+COUNT(DISTINCT customer_key) AS total_customers,
+SUM(quantity) AS total_quantity
+FROM gold.fact_sales
+WHERE order_date IS NOT NULL
+GROUP BY order_month, order_year
+ORDER BY order_year, order_month
 
 
--- Calculate yearly total sales, running total, and moving average price
-SELECT
-order_date,
-total_sales,
-SUM(total_sales) OVER (ORDER BY order_date) AS running_total_sales,
-ROUND(AVG(avg_price) OVER (ORDER BY order_date),2) AS moving_average_price
-FROM(
-  SELECT 
-  DATE_TRUNC('year', order_date)::date AS order_date,
-  SUM(sales_amount) AS total_sales,
-  AVG(price) AS avg_price
-  FROM gold.fact_sales
-  GROUP BY DATE_TRUNC('year', order_date)
-) t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
