@@ -2,16 +2,55 @@
    8. Cumulative Analysis
 ========================================================= */
 
--- Overall cumulative sales
-SELECT order_date, SUM(sales_amount) OVER (ORDER BY order_date) AS cumulative_sales
-FROM gold.fact_sales;
+-- Calculate the total sales per month and the running total of sales over years 
 
--- YTD cumulative sales (added)
-SELECT DATE_TRUNC('year', order_date)::date AS year,
-       DATE_TRUNC('month', order_date)::date AS month,
-       SUM(sales_amount) AS monthly_sales,
-       SUM(SUM(sales_amount)) OVER (PARTITION BY DATE_TRUNC('year', order_date)
-                                    ORDER BY DATE_TRUNC('month', order_date)) AS ytd_sales
+--For months:-
+SELECT
+order_date,
+total_sales,
+SUM(total_sales) OVER (PARTITION BY DATE_PART('year', order_date) ORDER BY order_date) AS running_total_sales,
+ROUND(AVG(avg_price) OVER (PARTITION BY DATE_PART('year', order_date) ORDER BY order_date),2) AS moving_average_price
+FROM(
+SELECT 
+DATE_TRUNC('month', order_date)::date AS order_date,
+SUM(sales_amount) AS total_sales,
+AVG(price) AS avg_price
 FROM gold.fact_sales
-GROUP BY 1,2
-ORDER BY 1,2;
+WHERE order_date IS NOT NULL
+GROUP BY DATE_TRUNC('month', order_date)::date
+)t
+
+
+--Calculate the total sales per month
+--and the running total of sales over time
+SELECT
+order_date,
+total_sales,
+SUM(total_sales) OVER (ORDER BY order_date) AS running_total_sales,
+ROUND(AVG(avg_price) OVER (ORDER BY order_date),2) AS moving_average_price
+FROM(
+SELECT 
+DATE_TRUNC('month', order_date)::date AS order_date,
+SUM(sales_amount) AS total_sales,
+AVG(price) AS avg_price
+FROM gold.fact_sales
+WHERE order_date IS NOT NULL
+GROUP BY DATE_TRUNC('month', order_date)::date
+)t
+
+
+--Calculate the total sales per year and the running total of sales over time
+SELECT
+order_date,
+total_sales,
+SUM(total_sales) OVER (ORDER BY order_date) AS running_total_sales,
+ROUND(AVG(avg_price) OVER(ORDER BY order_date),2) AS moving_average_price
+FROM(
+SELECT 
+DATE_TRUNC('year', order_date)::date AS order_date,
+SUM(sales_amount) AS total_sales,
+AVG(price) AS avg_price
+FROM gold.fact_sales
+WHERE order_date IS NOT NULL
+GROUP BY DATE_TRUNC('year', order_date)::date
+)t
