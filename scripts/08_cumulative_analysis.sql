@@ -1,5 +1,6 @@
-
-
+/* =========================================================
+   8. Cumulative Analysis
+========================================================= */
 
 -- Overall cumulative sales
 SELECT order_date, SUM(sales_amount) OVER (ORDER BY order_date) AS cumulative_sales
